@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products - Khajotia Sound</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+        }
+
+        main {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            height: 180px;
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-tag {
+            background: var(--background);
+            color: var(--text-muted);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            border-radius: 0.5rem;
+        }
+
+        .btn-edit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .material-icons {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Simple Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <span class="material-icons">speaker_group</span>
+                    Khajotia Sound
+                </a>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary">
+                        <span class="material-icons">store</span>
+                        View Website
+                    </a>
+                    <a href="add-product.html" class="btn btn-primary">
+                        <span class="material-icons">add</span>
+                        Add Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1 class="page-title">Manage Products</h1>
+            <p class="page-subtitle">View, edit, and delete your products</p>
+
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <span class="material-icons">inventory_2</span>
+                <h3>No products found</h3>
+                <p>Add your first product to get started</p>
+                <a href="add-product.html" class="btn btn-primary" style="margin-top: 1rem;">
+                    <span class="material-icons">add</span>
+                    Add Product
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Product</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" id="editPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="editDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Features (comma separated)</label>
+                        <input type="text" id="editFeatures" placeholder="e.g., Bluetooth 5.0, Bass reflex, 200W power">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveProduct()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default products
+        const defaultProducts = [
+            {
+                id: 'default-1',
+                name: 'The Titan Pro',
+                price: '₹3,200',
+                description: 'Premium tower speakers with deep bass and crystal clear highs.',
+                imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.09 (1).jpeg',
+                features: ['Dual 8" woofers', '1" silk dome tweeter', '90dB sensitivity'],
+                isDefault: true
+            },
+            {
+                id: 'default-2',
+                name: 'The Aura X1',
+                price: '₹2,800',
+                description: 'Sleek and powerful tower speakers with modern design.',
+                imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.09.jpeg',
+                features: ['Triple driver system', 'Bass reflex port', 'Wooden cabinet'],
+                isDefault: true
+            },
+            {
+                id: 'default-3',
+                name: 'The Studio Elite',
+                price: '₹3,500',
+                description: 'Professional-grade tower speakers for audiophiles.',
+                imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.10 (1).jpeg',
+                features: ['3-way speaker system', 'Bi-wire capable', 'Gold-plated terminals'],
+                isDefault: true
+            },
+            {
+                id: 'default-4',
+                name: 'The Grand Symphony',
+                price: '₹3,800',
+                description: 'Floor-standing speakers with concert-hall quality sound.',
+                imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.10.jpeg',
+                features: ['4-driver array', '200W peak power', 'Piano black finish'],
+                isDefault: true
+            },
+            {
+                id: 'default-5',
+                name: 'The Compact Pro',
+                price: '₹2,500',
+                description: 'Compact yet powerful speakers for smaller spaces.',
+                imageUrl: 'WhatsApp Image 2025-10-22 at 00.00.22.jpeg',
+                features: ['Dual 6.5" woofers', '1" soft dome tweeter', 'Bass reflex design'],
+                isDefault: true
+            }
+        ];
+
+        let allProducts = [];
+        let currentEditingId = null;
+
+        // Load products
+        function loadProducts() {
+            const savedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+            allProducts = [...defaultProducts, ...savedProducts];
+            renderProducts();
+        }
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            console.log('Rendering products, total:', allProducts.length);
+
+            if (allProducts.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = '';
+            
+            allProducts.forEach(product => {
+                console.log('Rendering:', product.name, 'ID:', product.id, 'isDefault:', product.isDefault);
+                
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                card.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.imageUrl}" alt="${product.name}" 
+                             onerror="this.src='https://placehold.co/300x200/f1f5f9/64748b?text=Product'">
+                        ${product.isDefault ? '<div class="product-badge">Default</div>' : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-price">${product.price}</div>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-features">
+                            ${product.features.slice(0, 3).map(feature => 
+                                `<span class="feature-tag">${feature}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="product-actions">
+                            ${!product.isDefault ? `
+                                <button class="btn btn-small btn-edit" data-id="${product.id}">
+                                    <span class="material-icons" style="font-size: 1rem;">edit</span>
+                                    Edit
+                                </button>
+                                <button class="btn btn-small btn-delete" data-id="${product.id}">
+                                    <span class="material-icons" style="font-size: 1rem;">delete</span>
+                                    Delete
+                                </button>
+                            ` : `
+                                <button class="btn btn-small btn-secondary" disabled>
+                                    <span class="material-icons" style="font-size: 1rem;">lock</span>
+                                    Default
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            // Add event listeners after DOM is created
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    console.log('Edit clicked via event listener:', productId);
+                    editProduct(productId);
+                });
+            });
+            
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    console.log('Delete clicked via event listener:', productId);
+                    deleteProduct(productId);
+                });
+            });
+        }
+
+        // Edit product
+        function editProduct(productId) {
+            console.log('Edit button clicked for product:', productId);
+            const product = allProducts.find(p => p.id === productId);
+            console.log('Found product:', product);
+            
+            if (!product || product.isDefault) {
+                console.log('Cannot edit: product not found or is default');
+                return;
+            }
+
+            currentEditingId = productId;
+            
+            document.getElementById('editName').value = product.name;
+            document.getElementById('editPrice').value = product.price.replace('₹', '').replace(',', '');
+            document.getElementById('editDescription').value = product.description;
+            document.getElementById('editFeatures').value = product.features.join(', ');
+
+            console.log('Opening modal...');
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        // Save product
+        function saveProduct() {
+            if (!currentEditingId) return;
+
+            const name = document.getElementById('editName').value.trim();
+            const price = document.getElementById('editPrice').value;
+            const description = document.getElementById('editDescription').value.trim();
+            const featuresText = document.getElementById('editFeatures').value.trim();
+
+            if (!name || !price || !description) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const features = featuresText ? featuresText.split(',').map(f => f.trim()).filter(f => f) : [];
+
+            const savedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+            const productIndex = savedProducts.findIndex(p => p.id === currentEditingId);
+
+            if (productIndex !== -1) {
+                savedProducts[productIndex] = {
+                    ...savedProducts[productIndex],
+                    name,
+                    price: `₹${price}`,
+                    description,
+                    features,
+                    updatedAt: new Date().toISOString()
+                };
+
+                localStorage.setItem('products', JSON.stringify(savedProducts));
+                loadProducts();
+                closeModal();
+                showNotification('Product updated successfully!', 'success');
+            }
+        }
+
+        // Delete product
+        function deleteProduct(productId) {
+            console.log('Delete button clicked for product:', productId);
+            const product = allProducts.find(p => p.id === productId);
+            console.log('Found product:', product);
+            
+            if (!product || product.isDefault) {
+                console.log('Cannot delete: product not found or is default');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete this product?')) {
+                const savedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+                const filteredProducts = savedProducts.filter(p => p.id !== productId);
+                localStorage.setItem('products', JSON.stringify(filteredProducts));
+                
+                console.log('Product deleted, reloading...');
+                loadProducts();
+                showNotification('Product deleted successfully!', 'success');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('show');
+            currentEditingId = null;
+            document.getElementById('editForm').reset();
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        console.log('Page loaded, initializing...');
+        loadProducts();
+
+        // Make functions globally accessible
+        window.editProduct = editProduct;
+        window.deleteProduct = deleteProduct;
+        window.saveProduct = saveProduct;
+        window.closeModal = closeModal;
+        
+        console.log('Functions made global:', {
+            editProduct: typeof editProduct,
+            deleteProduct: typeof deleteProduct,
+            saveProduct: typeof saveProduct,
+            closeModal: typeof closeModal
+        });
+    </script>
+</body>
+</html>

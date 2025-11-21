@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Khajotia Sound</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--background);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .back-btn:hover {
+            background: var(--surface);
+            transform: translateY(-1px);
+        }
+
+        main {
+            padding: 3rem 0;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .price-input-group {
+            position: relative;
+        }
+
+        .price-input-group::before {
+            content: '₹';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .price-input-group input {
+            padding-left: 2rem;
+        }
+
+        .image-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: var(--background);
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.02);
+        }
+
+        .image-upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .features-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .feature-input-group input {
+            flex: 1;
+        }
+
+        .remove-feature-btn {
+            padding: 0.75rem;
+            background: #fee2e2;
+            color: var(--error);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-feature-btn:hover {
+            background: #fecaca;
+        }
+
+        .add-feature-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--background);
+            color: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .add-feature-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--background);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+            transform: translateY(-1px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-message {
+            display: none;
+            background: #fee2e2;
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .generated-link {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <span class="material-icons">speaker_group</span>
+                    Khajotia Sound
+                </a>
+                <a href="index.html" class="back-btn">
+                    <span class="material-icons">arrow_back</span>
+                    Back to Website
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1 class="page-title">Add New Product</h1>
+            <p class="page-subtitle">Upload product images and add details to showcase your premium speakers</p>
+
+            <div class="success-message" id="successMessage">
+                <span class="material-icons">check_circle</span>
+                <span>Product added successfully!</span>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <span class="material-icons">error</span>
+                <span id="errorText">Something went wrong. Please try again.</span>
+            </div>
+
+            <div class="form-card">
+                <form id="productForm">
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">image</span>
+                            Product Image
+                        </h2>
+                        <div class="image-upload-area" id="uploadArea">
+                            <span class="material-icons upload-icon">cloud_upload</span>
+                            <div class="upload-text">Click to upload or drag and drop</div>
+                            <div class="upload-subtext">PNG, JPG, GIF up to 10MB</div>
+                            <input type="file" id="imageInput" accept="image/*">
+                        </div>
+                        <div class="image-preview" id="imagePreview">
+                            <img id="previewImg" src="" alt="Product preview">
+                        </div>
+                        <input type="hidden" id="imageUrl" name="imageUrl">
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">info</span>
+                            Basic Information
+                        </h2>
+                        <div class="form-group">
+                            <label for="productName">Product Name *</label>
+                            <input type="text" id="productName" name="productName" required placeholder="e.g., The Titan Pro">
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Price *</label>
+                            <div class="price-input-group">
+                                <input type="number" id="productPrice" name="productPrice" required placeholder="3200" min="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Description *</label>
+                            <textarea id="productDescription" name="productDescription" required placeholder="Describe your product features and benefits..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">list</span>
+                            Key Features
+                        </h2>
+                        <div class="features-container" id="featuresContainer">
+                            <div class="feature-input-group">
+                                <input type="text" class="feature-input" placeholder="e.g., Dual 8\" woofers">
+                                <button type="button" class="remove-feature-btn" onclick="removeFeature(this)">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-feature-btn" onclick="addFeature()">
+                            <span class="material-icons">add</span>
+                            Add Feature
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="resetForm()">
+                            <span class="material-icons">refresh</span>
+                            Reset
+                        </button>
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            <span class="material-icons">add_shopping_cart</span>
+                            Add Product
+                        </button>
+                    </div>
+                </form>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Uploading image and creating product...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Using Postimages for free image hosting (no API key required)
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const imageUrl = document.getElementById('imageUrl');
+        const productForm = document.getElementById('productForm');
+        const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Image upload handling
+        uploadArea.addEventListener('click', () => imageInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleImageSelect(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageSelect(e.target.files[0]);
+            }
+        });
+
+        function handleImageSelect(file) {
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be less than 10MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Feature management
+        function addFeature() {
+            const container = document.getElementById('featuresContainer');
+            const featureGroup = document.createElement('div');
+            featureGroup.className = 'feature-input-group';
+            featureGroup.innerHTML = `
+                <input type="text" class="feature-input" placeholder="e.g., Bluetooth 5.0">
+                <button type="button" class="remove-feature-btn" onclick="removeFeature(this)">
+                    <span class="material-icons">close</span>
+                </button>
+            `;
+            container.appendChild(featureGroup);
+        }
+
+        function removeFeature(button) {
+            const container = document.getElementById('featuresContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+
+        // Form submission
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!previewImg.src || previewImg.src === '') {
+                showError('Please upload a product image');
+                return;
+            }
+
+            // Collect form data
+            const formData = new FormData(productForm);
+            const features = Array.from(document.querySelectorAll('.feature-input'))
+                .map(input => input.value.trim())
+                .filter(value => value !== '');
+
+            if (features.length === 0) {
+                showError('Please add at least one feature');
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            hideMessages();
+
+            try {
+                // Try multiple image hosting services with fallback
+                const imageFile = imageInput.files[0];
+                let imageUrl = null;
+                
+                // Method 1: Try to convert to base64 for local storage
+                const reader = new FileReader();
+                const base64Promise = new Promise((resolve) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(imageFile);
+                });
+                
+                const base64Data = await base64Promise;
+                
+                // For now, use base64 data URL (this works locally)
+                // In production, you'd want to use a real hosting service
+                imageUrl = base64Data;
+                
+                // Alternative: Use a free hosting service like Imgur (requires API key)
+                // Or Postimages (sometimes unreliable)
+                // Or Cloudinary (free tier available)
+                
+                if (!imageUrl) {
+                    throw new Error('Failed to process image');
+                }
+                
+                // Create product data
+                const productData = {
+                    id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                    name: formData.get('productName'),
+                    price: `₹${formData.get('productPrice')}`,
+                    description: formData.get('productDescription'),
+                    imageUrl: imageUrl,
+                    features: features,
+                    createdAt: new Date().toISOString()
+                };
+
+                // Compress image before saving
+                const compressedImageUrl = await compressImage(imageUrl);
+                productData.imageUrl = compressedImageUrl;
+
+                // Save to localStorage with quota management
+                try {
+                    let products = JSON.parse(localStorage.getItem('products') || '[]');
+                    
+                    // Check if we need to free up space
+                    if (products.length >= 10) {
+                        // Remove oldest products if we have too many
+                        products = products.slice(-5); // Keep only last 5 products
+                        showWarning('Storage limit reached. Removed oldest products to make space.');
+                    }
+                    
+                    products.push(productData);
+                    
+                    // Try to save, if it fails, compress further
+                    try {
+                        localStorage.setItem('products', JSON.stringify(products));
+                    } catch (quotaError) {
+                        // If still fails, remove more products
+                        products = products.slice(-3); // Keep only last 3 products
+                        localStorage.setItem('products', JSON.stringify(products));
+                        showWarning('Storage limit reached. Kept only 3 most recent products.');
+                    }
+                } catch (error) {
+                    throw new Error('Failed to save product. Please try with a smaller image.');
+                }
+
+                // Show success
+                showSuccess('Product added successfully!');
+                console.log('Product data:', productData);
+                console.log('Image stored as base64 data URL');
+
+                // Reset form after 2 seconds
+                setTimeout(() => {
+                    resetForm();
+                }, 2000);
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to add product. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function resetForm() {
+            productForm.reset();
+            imagePreview.style.display = 'none';
+            uploadArea.style.display = 'block';
+            previewImg.src = '';
+            
+            // Reset features to single input
+            const container = document.getElementById('featuresContainer');
+            container.innerHTML = `
+                <div class="feature-input-group">
+                    <input type="text" class="feature-input" placeholder="e.g., Dual 8\" woofers">
+                    <button type="button" class="remove-feature-btn" onclick="removeFeature(this)">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+            `;
+            
+            hideMessages();
+        }
+
+        function showSuccess(message) {
+            successMessage.style.display = 'flex';
+            successMessage.querySelector('span:last-child').textContent = message;
+        }
+
+        function showError(message) {
+            errorMessage.style.display = 'flex';
+            errorText.textContent = message;
+        }
+
+        function hideMessages() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+
+        function showWarning(message) {
+            // Create warning message element if it doesn't exist
+            let warningMessage = document.getElementById('warningMessage');
+            if (!warningMessage) {
+                warningMessage = document.createElement('div');
+                warningMessage.id = 'warningMessage';
+                warningMessage.style.cssText = `
+                    display: none;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 1rem;
+                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                    color: white;
+                    border-radius: 0.75rem;
+                    margin-bottom: 1rem;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                `;
+                warningMessage.innerHTML = `
+                    <span class="material-icons" style="font-size: 1.25rem;">warning</span>
+                    <span></span>
+                `;
+                const formContainer = document.querySelector('.form-container');
+                formContainer.insertBefore(warningMessage, productForm);
+            }
+            
+            warningMessage.style.display = 'flex';
+            warningMessage.querySelector('span:last-child').textContent = message;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                warningMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Image compression function
+        async function compressImage(dataUrl, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new dimensions
+                    let { width, height } = img;
+                    if (width > maxWidth) {
+                        height = (maxWidth / width) * height;
+                        width = maxWidth;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Draw and compress
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = dataUrl;
+            });
+        }
+
+        // Initialize with one feature input
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add initial feature input if none exists
+            const container = document.getElementById('featuresContainer');
+            if (container.children.length === 0) {
+                addFeature();
+            }
+        });
+    </script>
+</body>
+</html>

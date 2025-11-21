@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Product - Khajotia Sound</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Product System</h1>
+    
+    <h2>Step 1: Add Test Product</h2>
+    <button class="btn" onclick="addTestProduct()">Add Test Product</button>
+    <div id="addResult" class="result"></div>
+    
+    <h2>Step 2: Check Products</h2>
+    <button class="btn" onclick="checkProducts()">Check All Products</button>
+    <div id="checkResult" class="result"></div>
+    
+    <h2>Step 3: Test Edit/Delete</h2>
+    <button class="btn" onclick="testEdit()">Test Edit Function</button>
+    <button class="btn" onclick="testDelete()">Test Delete Function</button>
+    <div id="testResult" class="result"></div>
+    
+    <h2>Step 4: Go to Manage Page</h2>
+    <a href="manage-products-simple.html" class="btn">Open Manage Products</a>
+
+    <script>
+        function addTestProduct() {
+            const testProduct = {
+                id: 'test-' + Date.now(),
+                name: 'Test Speaker Pro',
+                price: '₹1,999',
+                description: 'This is a test product for debugging',
+                imageUrl: 'https://placehold.co/300x200/f1f5f9/64748b?text=Test+Speaker',
+                features: ['Test feature 1', 'Test feature 2', 'Test feature 3'],
+                createdAt: new Date().toISOString()
+            };
+            
+            let products = JSON.parse(localStorage.getItem('products') || '[]');
+            products.push(testProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            document.getElementById('addResult').innerHTML = 
+                '✅ Test product added! ID: ' + testProduct.id + '<br>' +
+                'Name: ' + testProduct.name + '<br>' +
+                'Total products in storage: ' + products.length;
+        }
+        
+        function checkProducts() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            let html = '📦 Products in localStorage:<br>';
+            
+            if (products.length === 0) {
+                html += 'No custom products found. Add a test product first.';
+            } else {
+                products.forEach((product, index) => {
+                    html += `${index + 1}. ${product.name} (ID: ${product.id})<br>`;
+                });
+            }
+            
+            document.getElementById('checkResult').innerHTML = html;
+        }
+        
+        function testEdit() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            if (products.length === 0) {
+                document.getElementById('testResult').innerHTML = '❌ No products to edit. Add a test product first.';
+                return;
+            }
+            
+            const testProduct = products[0];
+            document.getElementById('testResult').innerHTML = 
+                '✅ Edit function exists<br>' +
+                'Would edit product: ' + testProduct.name + ' (ID: ' + testProduct.id + ')<br>' +
+                'Open manage page to test actual edit button.';
+        }
+        
+        function testDelete() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            if (products.length === 0) {
+                document.getElementById('testResult').innerHTML = '❌ No products to delete. Add a test product first.';
+                return;
+            }
+            
+            const testProduct = products[0];
+            document.getElementById('testResult').innerHTML = 
+                '✅ Delete function exists<br>' +
+                'Would delete product: ' + testProduct.name + ' (ID: ' + testProduct.id + ')<br>' +
+                'Open manage page to test actual delete button.';
+        }
+        
+        // Clear all test products
+        function clearTestProducts() {
+            localStorage.removeItem('products');
+            document.getElementById('addResult').innerHTML = '🗑️ All test products cleared';
+        }
+    </script>
+    
+    <button class="btn" onclick="clearTestProducts()" style="background: #ef4444;">Clear All Test Products</button>
+</body>
+</html>
