@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khajotia sound - Premium Tower Speakers</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Font (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Load React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Load Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      /* Apply Inter font and text shadow for hero */
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .shadow-text {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+    </style>
+</head>
+<body class="font-sans antialiased bg-white">
+    
+    <!-- This is where the React app will be mounted -->
+    <div id="root"></div>
+
+    <!-- The React code (JSX) is inside this script tag -->
+    <script type="text/babel">
+      
+      const { useState } = React;
+
+      // --- SVG Icons ---
+
+      // Logo for Khajotia Sound
+      const LogoIcon = () => (
+        <svg
+          width="40"
+          height="40"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-8 w-8 sm:h-10 sm:w-10 text-white"
+        >
+          {/* Base of the speaker */}
+          <rect x="20" y="10" width="60" height="80" rx="8" fill="currentColor" />
+          {/* Large Woofer */}
+          <circle cx="50" cy="70" r="18" fill="#1f2937" />
+          <circle cx="50" cy="70" r="12" fill="#374151" />
+          {/* Mid-range speaker */}
+          <circle cx="50" cy="40" r="10" fill="#1f2937" />
+          {/* Tweeter */}
+          <circle cx="50" cy="22" r="6" fill="#1f2937" />
+          {/* Sound waves (subtle) */}
+          <path
+            d="M75 40 Q 80 40, 80 45"
+            stroke="#4b5563"
+            strokeWidth="2"
+            fill="none"
+          />
+          <path
+            d="M75 35 Q 85 40, 85 50"
+            stroke="#4b5563"
+            strokeWidth="2"
+            fill="none"
+          />
+        </svg>
+      );
+
+      const SoundWaveIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-8 w-8 text-blue-400"
+        >
+          <path d="M2 10v4" />
+          <path d="M6 7v10" />
+          <path d="M10 4v16" />
+          <path d="M14 7v10" />
+          <path d="M18 10v4" />
+          <path d="M22 10v4" />
+        </svg>
+      );
+
+      const BluetoothIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-8 w-8 text-blue-400"
+        >
+          <path d="m6.5 6.5 11 11L12 23V1l5.5 5.5-11 11" />
+        </svg>
+      );
+
+      const LayersIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-8 w-8 text-blue-400"
+        >
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      );
+
+      // Corrected, standard WhatsApp Icon
+      const WhatsAppIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="h-5 w-5"
+        >
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.4 3.481 2.233 2.24 3.482 5.22 3.482 8.401-0 6.557-5.338 11.892-11.893 11.892-1.99 0-3.883-0.523-5.525-1.453l-6.325 1.654zM7.188 19.129l0.332 0.19c1.422 0.816 3.033 1.24 4.68 1.24 5.219-0.001 9.4-4.201 9.401-9.42 0-2.502-0.986-4.81-2.738-6.566-1.749-1.758-4.053-2.748-6.55-2.748-5.219 0-9.4 4.201-9.4 9.419 0 1.799 0.506 3.522 1.438 4.957l0.232 0.36-1.04 3.813 3.897-1.02zM18.1 14.65c-0.124-0.204-0.45-0.32-0.655-0.34-0.18-0.019-0.403-0.02-0.57 0.11-0.165 0.129-0.27 0.29-0.379 0.42-0.106 0.13-0.21 0.16-0.306 0.18-0.098 0.019-0.18 0.01-0.27-0.01-0.09-0.02-0.22-0.06-0.48-0.17-0.26-0.11-0.54-0.26-0.81-0.45-1.02-0.7-1.76-1.49-2.09-1.79-0.31-0.29-0.6-0.61-0.78-0.84-0.18-0.24-0.36-0.4-0.41-0.46-0.05-0.06-0.1-0.07-0.16-0.09s-0.11-0.02-0.17-0.02-0.11 0-0.17 0.01c-0.06 0.01-0.11 0.01-0.15 0.02-0.04 0.01-0.09 0.01-0.13 0.02s-0.08 0.02-0.1 0.03-0.05 0.02-0.05 0.02c-0.02 0.01-0.03 0.01-0.05 0.01-0.25 0.03-0.48 0.13-0.68 0.22-0.19 0.09-0.37 0.21-0.51 0.37-0.14 0.16-0.25 0.35-0.34 0.57-0.09 0.22-0.13 0.46-0.13 0.71s0.09 0.51 0.14 0.63c0.05 0.12 0.11 0.24 0.18 0.36 0.07 0.12 0.14 0.24 0.21 0.36s0.14 0.24 0.19 0.3c0.16 0.19 0.34 0.39 0.54 0.6 0.2 0.21 0.42 0.42 0.65 0.64 0.23 0.22 0.48 0.44 0.73 0.64s0.53 0.4 0.81 0.59c0.28 0.19 0.57 0.37 0.88 0.54 0.3 0.17 0.63 0.33 0.96 0.47 0.34 0.14 0.68 0.21 1.02 0.21 0.34 0 0.67-0.04 0.98-0.13 0.31-0.09 0.59-0.22 0.84-0.38 0.24-0.17 0.45-0.37 0.62-0.62 0.17-0.24 0.29-0.51 0.37-0.81 0.08-0.29 0.1-0.6 0.06-0.91-0.04-0.31-0.13-0.6-0.28-0.85z" />
+        </svg>
+      );
+
+      const MenuIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-6 w-6"
+        >
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      );
+
+      const XIcon = () => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-6 w-6"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      );
+
+      // --- Global Settings ---
+      // WhatsApp number for customer inquiries
+      const WHATSAPP_NUMBER = "919311123111";
+      const WHATSAPP_BASE_URL = "https://wa.me/";
+
+      // IMPORTANT: Replace this with your dad's business name.
+      const BUSINESS_NAME = "Khajotia sound";
+
+      // --- Components ---
+
+      // Header Component
+      const Header = () => {
+        const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+        const navItems = [
+          { name: 'Home', href: '#' },
+          { name: 'Features', href: '#features' },
+          { name: 'Products', href: '#products' },
+        ];
+
+        return (
+          <header className="absolute top-0 left-0 right-0 z-10 bg-black bg-opacity-30 text-white">
+            <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+              {/* Logo and Brand Name */}
+              <a href="#" className="flex items-center space-x-2">
+                <LogoIcon />
+                <span className="text-xl sm:text-2xl font-bold tracking-tight">
+                  {BUSINESS_NAME}
+                </span>
+              </a>
+
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex space-x-6">
+                {navItems.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="text-gray-200 hover:text-white transition-colors"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </nav>
+
+              {/* CTA Button (Desktop) */}
+              <a
+                href={`${WHATSAPP_BASE_URL}${WHATSAPP_NUMBER}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden md:flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-2 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              >
+                <WhatsAppIcon />
+                <span>Enquire Now</span>
+              </a>
+
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                  {isMenuOpen ? <XIcon /> : <MenuIcon />}
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Menu (Dropdown) */}
+            {isMenuOpen && (
+              <div className="md:hidden bg-gray-900 bg-opacity-90 px-6 py-4">
+                <nav className="flex flex-col space-y-4">
+                  {navItems.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-gray-200 hover:text-white text-lg"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                  <a
+                    href={`${WHATSAPP_BASE_URL}${WHATSAPP_NUMBER}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-lg shadow-lg"
+                  >
+                    <WhatsAppIcon />
+                    <span>Enquire Now</span>
+                  </a>
+                </nav>
+              </div>
+            )}
+          </header>
+        );
+      };
+
+      // Hero Section Component
+      const Hero = () => {
+        return (
+          <section className="relative h-screen flex items-center justify-center text-center text-white bg-gray-900">
+            {/* Background Image */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url(https://images.unsplash.com/photo-1588022272890-d5a353c3e8A9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNjUyOXwwfDF8c2VhcmNofDEzfHx0b3dlciUyMHNwZWFrZXJ8ZW58MHx8fHwxNzMwNTk3MTY4fDA&ixlib=rb-4.0.3&q=80&w=1080)",
+              }}
+            ></div>
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black opacity-60"></div>
+
+            {/* Content */}
+            <div className="relative z-10 p-6 max-w-3xl">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 shadow-text">
+                Experience Sound Redefined
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto shadow-text">
+                Discover {BUSINESS_NAME}'s premium tower speakers. Handcrafted for
+                unmatched clarity, deep bass, and powerful performance.
+              </p>
+              <a
+                href={`${WHATSAPP_BASE_URL}${WHATSAPP_NUMBER}?text=I'm interested in your tower speakers!`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-xl transition-transform transform hover:scale-105"
+              >
+                <WhatsAppIcon />
+                <span>Enquire on WhatsApp</span>
+              </a>
+            </div>
+          </section>
+        );
+      };
+
+      // Features Section Component
+      const Features = () => {
+        const featuresList = [
+          {
+            icon: <SoundWaveIcon />,
+            title: 'Crystal Clear Audio',
+            description:
+              'Engineered with high-fidelity components for a crisp, detailed sound signature.',
+          },
+          {
+            icon: <LayersIcon />,
+            title: 'Premium Build Quality',
+            description:
+              'Constructed from solid, dense materials to eliminate vibration and distortion.',
+          },
+          {
+            icon: <BluetoothIcon />,
+            title: 'Modern Connectivity',
+            description:
+              'Seamlessly connect your devices via Bluetooth, Optical, or RCA inputs.',
+          },
+        ];
+
+        return (
+          <section id="features" className="py-20 bg-gray-100">
+            <div className="container mx-auto px-6">
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
+                Why Choose {BUSINESS_NAME}?
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {featuresList.map((feature) => (
+                  <div
+                    key={feature.title}
+                    className="bg-white p-8 rounded-lg shadow-lg text-center"
+                  >
+                    <div className="inline-block bg-blue-100 p-4 rounded-full mb-6">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Product Gallery Component
+      const ProductGallery = () => {
+        // Product data with local images
+        const products = [
+          {
+            name: 'The Titan Pro',
+            price: '₹3,200',
+            description: 'Premium tower speakers with deep bass and crystal clear highs. Perfect for home theaters and music enthusiasts.',
+            imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.09 (1).jpeg',
+            features: ['Dual 8" woofers', '1" silk dome tweeter', '90dB sensitivity', '8Ω impedance']
+          },
+          {
+            name: 'The Aura X1',
+            price: '₹2,800',
+            description: 'Sleek and powerful tower speakers with a modern design that complements any room decor.',
+            imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.09.jpeg',
+            features: ['Triple driver system', 'Bass reflex port', 'Wooden cabinet', 'Magnetic grille']
+          },
+          {
+            name: 'The Studio Elite',
+            price: '₹3,500',
+            description: 'Professional-grade tower speakers for audiophiles who demand the best in sound reproduction.',
+            imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.10 (1).jpeg',
+            features: ['3-way speaker system', 'Bi-wire capable', 'Gold-plated terminals', 'Spiked feet included']
+          },
+          {
+            name: 'The Grand Symphony',
+            price: '₹3,800',
+            description: 'Floor-standing speakers that deliver concert-hall quality sound in your living room.',
+            imageUrl: 'WhatsApp Image 2025-10-21 at 23.36.10.jpeg',
+            features: ['4-driver array', '200W peak power', 'Piano black finish', 'Detachable grille']
+          },
+          {
+            name: 'The Bass Master',
+            price: '₹3,000',
+            description: 'Powerful bass response with balanced midrange and crisp highs for an immersive experience.',
+            imageUrl: 'WhatsApp Image 2025-10-22 at 00.00.22.jpeg',
+            features: ['Dual 6.5" woofers', '1" soft dome tweeter', 'Bass reflex design', 'MDF construction']
+          }
+        ];
+
+        return (
+          <section id="products" className="py-20 bg-gray-900 text-white">
+            <div className="container mx-auto px-6">
+              <h2 className="text-3xl font-bold text-center mb-12">Our Models</h2>
+              {/*
+                'grid-auto-rows-fr' makes all rows in the grid have the same height,
+                ensuring the cards in each row are of equal height.
+              */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 grid-auto-rows-fr">
+                {products.map((product) => (
+                  <div
+                    key={product.name}
+                    className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden flex flex-col"
+                  >
+                    <div className="relative overflow-hidden group h-80 bg-gray-900">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://placehold.co/600x400/374151/FFF?text=Image+Not+Found';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                        <div className="text-white text-sm space-y-1">
+                          {product.features.map((feature, index) => (
+                            <div key={index} className="flex items-center">
+                              <svg className="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              {feature}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {/*
+                      'flex flex-col flex-grow' makes this div expand to fill the available
+                      space in the card, pushing the button to the bottom.
+                    */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h3 className="text-2xl font-bold mb-2 text-white">{product.name}</h3>
+                      <p className="text-gray-300 mb-4 flex-grow text-sm">
+                        {product.description}
+                      </p>
+                      <div className="text-2xl font-semibold text-blue-400 mb-4">
+                        {product.price}
+                        <span className="text-sm text-gray-400 ml-2">(Incl. GST)</span>
+                      </div>
+                      {/* 'mt-auto' pushes the button to the bottom of its flex container */}
+                      <a
+                        href={`${WHATSAPP_BASE_URL}${WHATSAPP_NUMBER}?text=I'm interested in the ${product.name} model!`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-auto flex items-center justify-center space-x-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                      >
+                        <WhatsAppIcon />
+                        <span>Enquire Now</span>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Footer Component
+      const Footer = () => {
+        return (
+          <footer className="bg-gray-800 text-gray-400 py-10">
+            <div className="container mx-auto px-6 text-center">
+              <p>
+                &copy; {new Date().getFullYear()} {BUSINESS_NAME}. All Rights Reserved.
+              </p>
+              <p className="text-sm mt-2">
+                Quality Sound, Locally Crafted.
+              </p>
+            </div>
+          </footer>
+        );
+      };
+
+      // Main App Component
+      function App() {
+        return (
+          <div className="font-sans antialiased bg-white">
+            <Header />
+            <main>
+              <Hero />
+              <Features />
+              <ProductGallery />
+            </main>
+            <Footer />
+          </div>
+        );
+      }
+
+      // --- Mount the React App ---
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<App />);
+
+    </script>
+</body>
+</html>
+
