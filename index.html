@@ -873,6 +873,7 @@
         const [elevated, setElevated] = useState(false);
         const [logoClicks, setLogoClicks] = useState(0);
         const [showAdminButtons, setShowAdminButtons] = useState(false);
+        const [showContactDialog, setShowContactDialog] = useState(false);
 
         // No localStorage persistence - start fresh every session
         // Admin buttons are always hidden on page load
@@ -921,7 +922,7 @@
             { name: 'Add Product', href: 'add-product.html', icon: 'add' },
             { name: 'Manage', href: 'manage-products.html', icon: 'settings' }
           ] : []),
-          { name: 'Contact', href: '#contact', icon: 'email' },
+          { name: 'Contact', href: '#', icon: 'email', onClick: () => setShowContactDialog(true) },
         ];
         
         React.useEffect(() => {
@@ -946,7 +947,17 @@
                   {/* Desktop Navigation */}
                   <nav className="desktop-nav">
                     {navItems.map((item) => (
-                      <a key={item.name} href={item.href} className="nav-link">
+                      <a 
+                        key={item.name} 
+                        href={item.href} 
+                        className="nav-link"
+                        onClick={(e) => {
+                          if (item.onClick) {
+                            e.preventDefault();
+                            item.onClick();
+                          }
+                        }}
+                      >
                         <span className="material-icons nav-icon">{item.icon}</span>
                         {item.name}
                       </a>
@@ -984,7 +995,13 @@
                   <a
                     key={item.name}
                     href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={(e) => {
+                      if (item.onClick) {
+                        e.preventDefault();
+                        item.onClick();
+                      }
+                      setIsMenuOpen(false);
+                    }}
                   >
                     <span className="material-icons">{item.icon}</span>
                     {item.name}
@@ -994,13 +1011,301 @@
                   href={`${WHATSAPP_BASE_URL}${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ background: 'var(--primary)', color: 'white' }}
+                  style={{ 
+                    background: 'var(--primary)', 
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    textDecoration: 'none',
+                    fontWeight: '500'
+                  }}
                 >
                   <span className="material-icons">whatsapp</span>
                   Chat on WhatsApp
                 </a>
               </div>
             </div>
+
+            {/* Contact Dialog */}
+            {showContactDialog && (
+              <div 
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  backdropFilter: 'blur(4px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2000,
+                  padding: '1rem',
+                  animation: 'fadeIn 0.2s ease-out'
+                }}
+                onClick={() => setShowContactDialog(false)}
+              >
+                <div 
+                  style={{
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    borderRadius: '1.5rem',
+                    padding: '0',
+                    maxWidth: '480px',
+                    width: '100%',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    animation: 'slideUp 0.3s ease-out',
+                    overflow: 'hidden'
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '1rem',
+                      right: '1rem',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onClick={() => setShowContactDialog(false)}
+                    onMouseOver={(e) => {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+                      e.target.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                    >
+                      <span className="material-icons" style={{ fontSize: '18px', color: 'white' }}>
+                        close
+                      </span>
+                    </div>
+                    
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 1rem'
+                    }}>
+                      <span className="material-icons" style={{ fontSize: '32px', color: 'white' }}>
+                        contact_support
+                      </span>
+                    </div>
+                    
+                    <h2 style={{ 
+                      margin: 0, 
+                      fontSize: '1.75rem', 
+                      fontWeight: '700', 
+                      color: 'white',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Khajotia Sound
+                    </h2>
+                    <p style={{ 
+                      margin: 0, 
+                      color: 'rgba(255, 255, 255, 0.9)', 
+                      fontSize: '1rem'
+                    }}>
+                      Get in touch with us
+                    </p>
+                  </div>
+
+                  {/* Content */}
+                  <div style={{ padding: '2rem' }}>
+                    <div style={{ marginBottom: '2rem' }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        background: '#f8fafc',
+                        borderRadius: '0.75rem',
+                        marginBottom: '1rem',
+                        border: '1px solid #e2e8f0'
+                      }}
+                      >
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '0.75rem',
+                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '1rem'
+                        }}>
+                          <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
+                            phone
+                          </span>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
+                            Call Us
+                          </div>
+                          <div style={{ color: '#64748b', fontSize: '1.125rem', fontWeight: '500' }}>
+                            9311123111
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        background: '#f8fafc',
+                        borderRadius: '0.75rem',
+                        marginBottom: '1rem',
+                        border: '1px solid #e2e8f0'
+                      }}
+                      >
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '0.75rem',
+                          background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '1rem'
+                        }}>
+                          <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
+                            message
+                          </span>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
+                            WhatsApp
+                          </div>
+                          <div style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                            Chat with us instantly
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        background: '#f8fafc',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #e2e8f0'
+                      }}
+                      >
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '0.75rem',
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '1rem'
+                        }}>
+                          <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
+                            schedule
+                          </span>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
+                            Business Hours
+                          </div>
+                          <div style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                            Mon-Sat: 10:00 AM - 8:00 PM
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <a
+                        href={`tel:9311123111`}
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          padding: '1rem',
+                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '0.75rem',
+                          fontWeight: '600',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 8px 12px -1px rgba(59, 130, 246, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.3)';
+                        }}
+                      >
+                        <span className="material-icons" style={{ fontSize: '20px' }}>
+                          call
+                        </span>
+                        Call Now
+                      </a>
+
+                      <a
+                        href={`${WHATSAPP_BASE_URL}9311123111?text=Hi%20Khajotia%20Sound,%20I'm%20interested%20in%20your%20products!`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          padding: '1rem',
+                          background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '0.75rem',
+                          fontWeight: '600',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 4px 6px -1px rgba(37, 211, 102, 0.3)'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 8px 12px -1px rgba(37, 211, 102, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 4px 6px -1px rgba(37, 211, 102, 0.3)';
+                        }}
+                      >
+                        <span className="material-icons" style={{ fontSize: '20px' }}>
+                          whatsapp
+                        </span>
+                        WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         );
       };
