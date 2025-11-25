@@ -1,9 +1,8 @@
 // Vercel serverless function for managing products
 // This will be deployed as /api/products
-// Uses JSON file storage for simplicity and no cost
+// Uses Vercel KV for persistent storage
 
-import fs from 'fs';
-import path from 'path';
+import { kv } from '@vercel/kv';
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -12,45 +11,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Path to products JSON file
-const productsFilePath = path.join(process.cwd(), 'data', 'products.json');
-
-// Ensure data directory exists
-function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-}
-
-// Read products from JSON file
-function readProducts() {
-  try {
-    ensureDataDir();
-    if (fs.existsSync(productsFilePath)) {
-      const data = fs.readFileSync(productsFilePath, 'utf8');
-      return JSON.parse(data);
-    }
-    // Create empty products file if it doesn't exist
-    fs.writeFileSync(productsFilePath, JSON.stringify([], null, 2));
-    return [];
-  } catch (error) {
-    console.error('Error reading products:', error);
-    return [];
-  }
-}
-
-// Write products to JSON file
-function writeProducts(products) {
-  try {
-    ensureDataDir();
-    fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2));
-    return true;
-  } catch (error) {
-    console.error('Error writing products:', error);
-    return false;
-  }
-}
+// Key for storing products in KV
+const PRODUCTS_KEY = 'khajotia-sound-products';
 
 // Handle CORS preflight requests
 function handleCors() {
@@ -63,9 +25,10 @@ function handleCors() {
 // GET /api/products - Fetch all products
 async function handleGet() {
   try {
-    const products = readProducts();
+    const products = await kv.get(PRODUCTS_KEY);
+    const productsData = products || [];
     
-    return new Response(JSON.stringify(products), {
+    return new Response(JSON.stringify(productsData), {
       status: 200,
       headers: {
         ...corsHeaders,
@@ -110,18 +73,14 @@ async function handlePost(request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Get existing products
-    const existingProducts = readProducts();
+    // Get existing products from KV
+    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
     
     // Add new product
     const updatedProducts = [...existingProducts, newProduct];
     
-    // Save to file
-    const success = writeProducts(updatedProducts);
-    
-    if (!success) {
-      throw new Error('Failed to save product');
-    }
+    // Save to KV
+    await kv.set(PRODUCTS_KEY, updatedProducts);
     
     return new Response(JSON.stringify(newProduct), {
       status: 201,
@@ -160,8 +119,8 @@ async function handlePut(request) {
       );
     }
 
-    // Get existing products
-    const existingProducts = readProducts();
+    // Get existing products from KV
+    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
     
     // Find and update the product
     const productIndex = existingProducts.findIndex(p => p.id === productData.id);
@@ -188,12 +147,8 @@ async function handlePut(request) {
 
     existingProducts[productIndex] = updatedProduct;
     
-    // Save to file
-    const success = writeProducts(existingProducts);
-    
-    if (!success) {
-      throw new Error('Failed to update product');
-    }
+    // Save to KV
+    await kv.set(PRODUCTS_KEY, existingProducts);
     
     return new Response(JSON.stringify(updatedProduct), {
       status: 200,
@@ -233,8 +188,8 @@ async function handleDelete(request) {
       );
     }
 
-    // Get existing products
-    const existingProducts = readProducts();
+    // Get existing products from KV
+    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
     
     // Filter out the product to delete
     const filteredProducts = existingProducts.filter(p => p.id !== productId);
@@ -252,12 +207,8 @@ async function handleDelete(request) {
       );
     }
 
-    // Save to file
-    const success = writeProducts(filteredProducts);
-    
-    if (!success) {
-      throw new Error('Failed to delete product');
-    }
+    // Save to KV
+    await kv.set(PRODUCTS_KEY, filteredProducts);
     
     return new Response(JSON.stringify({ message: 'Product deleted successfully' }), {
       status: 200,
