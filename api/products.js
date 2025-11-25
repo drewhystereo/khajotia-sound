@@ -1,6 +1,5 @@
 // Vercel serverless function for managing products
 // This will be deployed as /api/products
-// Uses Vercel KV for persistent storage
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -9,54 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Key for storing products in KV
-const PRODUCTS_KEY = 'khajotia-sound-products';
-
-// Check if KV is available
-let kvAvailable = false;
-let kvInstance = null;
-
-try {
-  // Dynamic import to handle potential KV setup issues
-  kvInstance = require('@vercel/kv').kv;
-  kvAvailable = true;
-  console.log('Vercel KV is available');
-} catch (error) {
-  console.log('Vercel KV not available, falling back to memory storage');
-  // Fallback to in-memory storage
-  let memoryProducts = [];
-}
-
-// Helper function to get products (KV or memory fallback)
-async function getProducts() {
-  if (kvAvailable && kvInstance) {
-    try {
-      const products = await kvInstance.get(PRODUCTS_KEY);
-      return products || [];
-    } catch (error) {
-      console.error('KV read error, using fallback:', error);
-      return [];
-    }
-  } else {
-    // Fallback to memory storage
-    return globalThis.memoryProducts || [];
-  }
-}
-
-// Helper function to set products (KV or memory fallback)
-async function setProducts(products) {
-  if (kvAvailable && kvInstance) {
-    try {
-      await kvInstance.set(PRODUCTS_KEY, products);
-    } catch (error) {
-      console.error('KV write error, using fallback:', error);
-      globalThis.memoryProducts = products;
-    }
-  } else {
-    // Fallback to memory storage
-    globalThis.memoryProducts = products;
-  }
-}
+// In-memory storage as fallback
+let memoryProducts = [];
 
 // Handle CORS preflight requests
 function handleCors() {
@@ -69,9 +22,7 @@ function handleCors() {
 // GET /api/products - Fetch all products
 async function handleGet() {
   try {
-    const products = await getProducts();
-    
-    return new Response(JSON.stringify(products), {
+    return new Response(JSON.stringify(memoryProducts), {
       status: 200,
       headers: {
         ...corsHeaders,
@@ -116,14 +67,8 @@ async function handlePost(request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Get existing products
-    const existingProducts = await getProducts();
-    
-    // Add new product
-    const updatedProducts = [...existingProducts, newProduct];
-    
-    // Save products
-    await setProducts(updatedProducts);
+    // Add to memory storage
+    memoryProducts.push(newProduct);
     
     return new Response(JSON.stringify(newProduct), {
       status: 201,
@@ -162,11 +107,8 @@ async function handlePut(request) {
       );
     }
 
-    // Get existing products
-    const existingProducts = await getProducts();
-    
     // Find and update the product
-    const productIndex = existingProducts.findIndex(p => p.id === productData.id);
+    const productIndex = memoryProducts.findIndex(p => p.id === productData.id);
     
     if (productIndex === -1) {
       return new Response(
@@ -183,15 +125,12 @@ async function handlePut(request) {
 
     // Update product with new data
     const updatedProduct = {
-      ...existingProducts[productIndex],
+      ...memoryProducts[productIndex],
       ...productData,
       updatedAt: new Date().toISOString(),
     };
 
-    existingProducts[productIndex] = updatedProduct;
-    
-    // Save products
-    await setProducts(existingProducts);
+    memoryProducts[productIndex] = updatedProduct;
     
     return new Response(JSON.stringify(updatedProduct), {
       status: 200,
@@ -231,13 +170,10 @@ async function handleDelete(request) {
       );
     }
 
-    // Get existing products
-    const existingProducts = await getProducts();
-    
     // Filter out the product to delete
-    const filteredProducts = existingProducts.filter(p => p.id !== productId);
+    const filteredProducts = memoryProducts.filter(p => p.id !== productId);
     
-    if (existingProducts.length === filteredProducts.length) {
+    if (memoryProducts.length === filteredProducts.length) {
       return new Response(
         JSON.stringify({ error: 'Product not found' }),
         {
@@ -250,8 +186,7 @@ async function handleDelete(request) {
       );
     }
 
-    // Save products
-    await setProducts(filteredProducts);
+    memoryProducts = filteredProducts;
     
     return new Response(JSON.stringify({ message: 'Product deleted successfully' }), {
       status: 200,
