@@ -6,6 +6,9 @@
     <title>Add Product - Khajotia Sound</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Load Product Storage -->
+    <script src="js/product-storage.js"></script>
     <style>
         * {
             margin: 0;
@@ -682,22 +685,18 @@
                 const compressedImageUrl = await compressImage(imageUrl);
                 productData.imageUrl = compressedImageUrl;
 
-                // Save to API instead of localStorage
+                // Save to client-side storage instead of API
                 try {
-                    const response = await fetch('/api/products', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(productData)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to save product to server');
+                    if (window.productStorage) {
+                        const savedProduct = await window.productStorage.addProduct(productData);
+                        console.log('Product saved successfully:', savedProduct);
+                    } else {
+                        // Fallback to localStorage
+                        let products = JSON.parse(localStorage.getItem('khajotia-products') || '[]');
+                        products.push(productData);
+                        localStorage.setItem('khajotia-products', JSON.stringify(products));
+                        console.log('Product saved to localStorage:', productData);
                     }
-
-                    const savedProduct = await response.json();
-                    console.log('Product saved successfully:', savedProduct);
 
                 } catch (error) {
                     throw new Error('Failed to save product. Please try again.');

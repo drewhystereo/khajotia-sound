@@ -25,6 +25,9 @@
     
     <!-- Load Babel to transpile JSX in the browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Load Product Storage -->
+    <script src="js/product-storage.js"></script>
 
     <style>
       * {
@@ -1503,26 +1506,29 @@
         // No default products - only custom products from localStorage
         const defaultProducts = [];
 
-        // Load products from API
+        // Load products from client-side storage
         const [products, setProducts] = React.useState(() => {
-          // Start with empty array, will load from API
+          // Start with empty array, will load from storage
           return [];
         });
 
-        // Load products from API on component mount
+        // Load products from storage on component mount
         React.useEffect(() => {
-          loadProductsFromAPI();
+          loadProductsFromStorage();
         }, []);
 
-        // Function to load products from API
-        async function loadProductsFromAPI() {
+        // Function to load products from client-side storage
+        async function loadProductsFromStorage() {
           try {
-            const response = await fetch('/api/products');
-            if (response.ok) {
-              const productsData = await response.json();
+            if (window.productStorage) {
+              const productsData = await window.productStorage.loadProducts();
               setProducts(productsData);
             } else {
-              console.error('Failed to load products from API');
+              // Fallback to localStorage
+              const stored = localStorage.getItem('khajotia-products');
+              if (stored) {
+                setProducts(JSON.parse(stored));
+              }
             }
           } catch (error) {
             console.error('Error loading products:', error);
@@ -1533,7 +1539,7 @@
         React.useEffect(() => {
           const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-              loadProductsFromAPI();
+              loadProductsFromStorage();
             }
           };
 
