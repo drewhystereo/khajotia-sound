@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products Data Store</title>
+</head>
+<body>
+    <script>
+        // Simple data store that works with GitHub Pages or any static hosting
+        let products = [];
+        
+        // Load products from localStorage (fallback)
+        function loadProducts() {
+            const stored = localStorage.getItem('khajotia-products');
+            if (stored) {
+                products = JSON.parse(stored);
+            }
+            return products;
+        }
+        
+        // Save products to localStorage
+        function saveProducts(newProducts) {
+            products = newProducts;
+            localStorage.setItem('khajotia-products', JSON.stringify(products));
+            return products;
+        }
+        
+        // Handle API requests
+        function handleRequest() {
+            const url = new URL(window.location.href);
+            const method = url.searchParams.get('method') || 'GET';
+            const id = url.searchParams.get('id');
+            
+            // CORS headers
+            const headers = {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json'
+            };
+            
+            // Handle different methods
+            if (method === 'GET') {
+                const products = loadProducts();
+                return new Response(JSON.stringify(products), { headers });
+            } else if (method === 'POST') {
+                // This would need to be handled differently for static hosting
+                const products = loadProducts();
+                return new Response(JSON.stringify(products), { headers });
+            }
+            
+            return new Response('OK', { headers });
+        }
+        
+        // Initialize
+        loadProducts();
+    </script>
+</body>
+</html>
