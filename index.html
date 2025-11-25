@@ -1503,55 +1503,43 @@
         // No default products - only custom products from localStorage
         const defaultProducts = [];
 
-        // Load products from localStorage
+        // Load products from API
         const [products, setProducts] = React.useState(() => {
-          try {
-            const savedProducts = localStorage.getItem('products');
-            if (savedProducts) {
-              const parsedProducts = JSON.parse(savedProducts);
-              // Only use saved products, no defaults
-              return parsedProducts;
-            }
-            return []; // No products if none saved
-          } catch (error) {
-            console.error('Error loading products:', error);
-            return [];
-          }
+          // Start with empty array, will load from API
+          return [];
         });
 
-        // Listen for storage changes to update products when new ones are added
+        // Load products from API on component mount
         React.useEffect(() => {
-          const handleStorageChange = (e) => {
-            if (e.key === 'products') {
-              try {
-                const savedProducts = JSON.parse(e.newValue || '[]');
-                setProducts(savedProducts); // Only use saved products
-              } catch (error) {
-                console.error('Error updating products:', error);
-              }
+          loadProductsFromAPI();
+        }, []);
+
+        // Function to load products from API
+        async function loadProductsFromAPI() {
+          try {
+            const response = await fetch('/api/products');
+            if (response.ok) {
+              const productsData = await response.json();
+              setProducts(productsData);
+            } else {
+              console.error('Failed to load products from API');
+            }
+          } catch (error) {
+            console.error('Error loading products:', error);
+          }
+        }
+
+        // Listen for visibility changes to refresh products
+        React.useEffect(() => {
+          const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+              loadProductsFromAPI();
             }
           };
 
-          window.addEventListener('storage', handleStorageChange);
-          
-          // Also check for updates when the window gains focus (in case the same tab adds products)
-          const handleFocus = () => {
-            try {
-              const savedProducts = localStorage.getItem('products');
-              if (savedProducts) {
-                const parsedProducts = JSON.parse(savedProducts);
-                setProducts(parsedProducts); // Only use saved products
-              }
-            } catch (error) {
-              console.error('Error refreshing products:', error);
-            }
-          };
-
-          window.addEventListener('focus', handleFocus);
-
+          document.addEventListener('visibilitychange', handleVisibilityChange);
           return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('focus', handleFocus);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
           };
         }, []);
 

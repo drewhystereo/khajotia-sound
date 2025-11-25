@@ -682,30 +682,25 @@
                 const compressedImageUrl = await compressImage(imageUrl);
                 productData.imageUrl = compressedImageUrl;
 
-                // Save to localStorage with quota management
+                // Save to API instead of localStorage
                 try {
-                    let products = JSON.parse(localStorage.getItem('products') || '[]');
-                    
-                    // Check if we need to free up space
-                    if (products.length >= 10) {
-                        // Remove oldest products if we have too many
-                        products = products.slice(-5); // Keep only last 5 products
-                        showWarning('Storage limit reached. Removed oldest products to make space.');
+                    const response = await fetch('/api/products', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(productData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to save product to server');
                     }
-                    
-                    products.push(productData);
-                    
-                    // Try to save, if it fails, compress further
-                    try {
-                        localStorage.setItem('products', JSON.stringify(products));
-                    } catch (quotaError) {
-                        // If still fails, remove more products
-                        products = products.slice(-3); // Keep only last 3 products
-                        localStorage.setItem('products', JSON.stringify(products));
-                        showWarning('Storage limit reached. Kept only 3 most recent products.');
-                    }
+
+                    const savedProduct = await response.json();
+                    console.log('Product saved successfully:', savedProduct);
+
                 } catch (error) {
-                    throw new Error('Failed to save product. Please try with a smaller image.');
+                    throw new Error('Failed to save product. Please try again.');
                 }
 
                 // Show success

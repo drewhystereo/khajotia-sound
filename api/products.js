@@ -278,8 +278,8 @@ async function handleDelete(request) {
   }
 }
 
-// Main handler
-export async function handler(request) {
+// Main handler for Vercel
+export default async function handler(request) {
   const url = new URL(request.url);
   const method = request.method;
 
