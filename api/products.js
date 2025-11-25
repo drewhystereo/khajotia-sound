@@ -1,5 +1,5 @@
 // Vercel serverless function for managing products
-// This will be deployed as /api/products
+// Uses Vercel KV with proper Redis connection
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -8,8 +8,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// In-memory storage as fallback
-let memoryProducts = [];
+// Key for storing products in KV
+const PRODUCTS_KEY = 'khajotia-sound-products';
+
+// Initialize KV connection
+let kv = null;
+
+try {
+  // Import KV dynamically
+  const { kv: kvInstance } = await import('@vercel/kv');
+  kv = kvInstance;
+  console.log('KV connection established');
+} catch (error) {
+  console.error('KV connection failed:', error);
+  // Fallback to memory storage
+  let memoryProducts = [];
+}
+
+// Helper functions
+async function getProducts() {
+  if (kv) {
+    try {
+      const products = await kv.get(PRODUCTS_KEY);
+      return products || [];
+    } catch (error) {
+      console.error('KV read error:', error);
+      return [];
+    }
+  } else {
+    return globalThis.memoryProducts || [];
+  }
+}
+
+async function setProducts(products) {
+  if (kv) {
+    try {
+      await kv.set(PRODUCTS_KEY, products);
+    } catch (error) {
+      console.error('KV write error:', error);
+      globalThis.memoryProducts = products;
+    }
+  } else {
+    globalThis.memoryProducts = products;
+  }
+}
 
 // Handle CORS preflight requests
 function handleCors() {
@@ -22,7 +64,9 @@ function handleCors() {
 // GET /api/products - Fetch all products
 async function handleGet() {
   try {
-    return new Response(JSON.stringify(memoryProducts), {
+    const products = await getProducts();
+    
+    return new Response(JSON.stringify(products), {
       status: 200,
       headers: {
         ...corsHeaders,
@@ -67,8 +111,14 @@ async function handlePost(request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Add to memory storage
-    memoryProducts.push(newProduct);
+    // Get existing products
+    const existingProducts = await getProducts();
+    
+    // Add new product
+    const updatedProducts = [...existingProducts, newProduct];
+    
+    // Save products
+    await setProducts(updatedProducts);
     
     return new Response(JSON.stringify(newProduct), {
       status: 201,
@@ -107,8 +157,11 @@ async function handlePut(request) {
       );
     }
 
+    // Get existing products
+    const existingProducts = await getProducts();
+    
     // Find and update the product
-    const productIndex = memoryProducts.findIndex(p => p.id === productData.id);
+    const productIndex = existingProducts.findIndex(p => p.id === productData.id);
     
     if (productIndex === -1) {
       return new Response(
@@ -125,12 +178,15 @@ async function handlePut(request) {
 
     // Update product with new data
     const updatedProduct = {
-      ...memoryProducts[productIndex],
+      ...existingProducts[productIndex],
       ...productData,
       updatedAt: new Date().toISOString(),
     };
 
-    memoryProducts[productIndex] = updatedProduct;
+    existingProducts[productIndex] = updatedProduct;
+    
+    // Save products
+    await setProducts(existingProducts);
     
     return new Response(JSON.stringify(updatedProduct), {
       status: 200,
@@ -170,10 +226,13 @@ async function handleDelete(request) {
       );
     }
 
-    // Filter out the product to delete
-    const filteredProducts = memoryProducts.filter(p => p.id !== productId);
+    // Get existing products
+    const existingProducts = await getProducts();
     
-    if (memoryProducts.length === filteredProducts.length) {
+    // Filter out the product to delete
+    const filteredProducts = existingProducts.filter(p => p.id !== productId);
+    
+    if (existingProducts.length === filteredProducts.length) {
       return new Response(
         JSON.stringify({ error: 'Product not found' }),
         {
@@ -186,7 +245,8 @@ async function handleDelete(request) {
       );
     }
 
-    memoryProducts = filteredProducts;
+    // Save products
+    await setProducts(filteredProducts);
     
     return new Response(JSON.stringify({ message: 'Product deleted successfully' }), {
       status: 200,
