@@ -2,8 +2,6 @@
 // This will be deployed as /api/products
 // Uses Vercel KV for persistent storage
 
-import { kv } from '@vercel/kv';
-
 // CORS headers for cross-origin requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +11,52 @@ const corsHeaders = {
 
 // Key for storing products in KV
 const PRODUCTS_KEY = 'khajotia-sound-products';
+
+// Check if KV is available
+let kvAvailable = false;
+let kvInstance = null;
+
+try {
+  // Dynamic import to handle potential KV setup issues
+  kvInstance = require('@vercel/kv').kv;
+  kvAvailable = true;
+  console.log('Vercel KV is available');
+} catch (error) {
+  console.log('Vercel KV not available, falling back to memory storage');
+  // Fallback to in-memory storage
+  let memoryProducts = [];
+}
+
+// Helper function to get products (KV or memory fallback)
+async function getProducts() {
+  if (kvAvailable && kvInstance) {
+    try {
+      const products = await kvInstance.get(PRODUCTS_KEY);
+      return products || [];
+    } catch (error) {
+      console.error('KV read error, using fallback:', error);
+      return [];
+    }
+  } else {
+    // Fallback to memory storage
+    return globalThis.memoryProducts || [];
+  }
+}
+
+// Helper function to set products (KV or memory fallback)
+async function setProducts(products) {
+  if (kvAvailable && kvInstance) {
+    try {
+      await kvInstance.set(PRODUCTS_KEY, products);
+    } catch (error) {
+      console.error('KV write error, using fallback:', error);
+      globalThis.memoryProducts = products;
+    }
+  } else {
+    // Fallback to memory storage
+    globalThis.memoryProducts = products;
+  }
+}
 
 // Handle CORS preflight requests
 function handleCors() {
@@ -25,10 +69,9 @@ function handleCors() {
 // GET /api/products - Fetch all products
 async function handleGet() {
   try {
-    const products = await kv.get(PRODUCTS_KEY);
-    const productsData = products || [];
+    const products = await getProducts();
     
-    return new Response(JSON.stringify(productsData), {
+    return new Response(JSON.stringify(products), {
       status: 200,
       headers: {
         ...corsHeaders,
@@ -73,14 +116,14 @@ async function handlePost(request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Get existing products from KV
-    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
+    // Get existing products
+    const existingProducts = await getProducts();
     
     // Add new product
     const updatedProducts = [...existingProducts, newProduct];
     
-    // Save to KV
-    await kv.set(PRODUCTS_KEY, updatedProducts);
+    // Save products
+    await setProducts(updatedProducts);
     
     return new Response(JSON.stringify(newProduct), {
       status: 201,
@@ -119,8 +162,8 @@ async function handlePut(request) {
       );
     }
 
-    // Get existing products from KV
-    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
+    // Get existing products
+    const existingProducts = await getProducts();
     
     // Find and update the product
     const productIndex = existingProducts.findIndex(p => p.id === productData.id);
@@ -147,8 +190,8 @@ async function handlePut(request) {
 
     existingProducts[productIndex] = updatedProduct;
     
-    // Save to KV
-    await kv.set(PRODUCTS_KEY, existingProducts);
+    // Save products
+    await setProducts(existingProducts);
     
     return new Response(JSON.stringify(updatedProduct), {
       status: 200,
@@ -188,8 +231,8 @@ async function handleDelete(request) {
       );
     }
 
-    // Get existing products from KV
-    const existingProducts = await kv.get(PRODUCTS_KEY) || [];
+    // Get existing products
+    const existingProducts = await getProducts();
     
     // Filter out the product to delete
     const filteredProducts = existingProducts.filter(p => p.id !== productId);
@@ -207,8 +250,8 @@ async function handleDelete(request) {
       );
     }
 
-    // Save to KV
-    await kv.set(PRODUCTS_KEY, filteredProducts);
+    // Save products
+    await setProducts(filteredProducts);
     
     return new Response(JSON.stringify({ message: 'Product deleted successfully' }), {
       status: 200,
