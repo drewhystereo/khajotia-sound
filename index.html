@@ -1503,35 +1503,65 @@
 
       // Product Gallery Component
       const ProductGallery = () => {
-        // No default products - only custom products from localStorage
-        const defaultProducts = [];
-
-        // Load products from client-side storage
-        const [products, setProducts] = React.useState(() => {
-          // Start with empty array, will load from storage
-          return [];
-        });
+        const [products, setProducts] = React.useState([]);
+        const [loading, setLoading] = React.useState(true);
+        const [error, setError] = React.useState(null);
 
         // Load products from storage on component mount
         React.useEffect(() => {
           loadProductsFromStorage();
+          
+          // Set up a small delay to ensure productStorage is available
+          const timer = setTimeout(() => {
+            if (!window.productStorage) {
+              console.warn('productStorage not available, using fallback');
+              loadFromLocalStorage();
+            }
+          }, 1000);
+          
+          return () => clearTimeout(timer);
         }, []);
+
+        // Function to load from localStorage as fallback
+        function loadFromLocalStorage() {
+          try {
+            const stored = localStorage.getItem('khajotia-products');
+            if (stored) {
+              setProducts(JSON.parse(stored));
+            }
+          } catch (error) {
+            console.error('Error loading from localStorage:', error);
+            setError('Failed to load products. Please refresh the page.');
+          } finally {
+            setLoading(false);
+          }
+        }
 
         // Function to load products from client-side storage
         async function loadProductsFromStorage() {
           try {
-            if (window.productStorage) {
+            setLoading(true);
+            setError(null);
+            
+            if (window.productStorage && typeof window.productStorage.loadProducts === 'function') {
               const productsData = await window.productStorage.loadProducts();
-              setProducts(productsData);
-            } else {
-              // Fallback to localStorage
-              const stored = localStorage.getItem('khajotia-products');
-              if (stored) {
-                setProducts(JSON.parse(stored));
+              if (Array.isArray(productsData)) {
+                setProducts(productsData);
+              } else {
+                console.warn('Invalid products data format, using fallback');
+                loadFromLocalStorage();
               }
+            } else {
+              console.warn('productStorage not available, using fallback');
+              loadFromLocalStorage();
+              return;
             }
           } catch (error) {
             console.error('Error loading products:', error);
+            setError('Failed to load products. Using cached data if available.');
+            loadFromLocalStorage();
+          } finally {
+            setLoading(false);
           }
         }
 
@@ -1549,6 +1579,64 @@
           };
         }, []);
 
+        // Show loading state
+        if (loading) {
+          return (
+            <section id="products" className="products-section">
+              <div className="products-container">
+                <div className="section-header">
+                  <div className="section-badge">Loading Products</div>
+                  <h2 className="section-title">Loading Your Collection</h2>
+                  <div className="loading-spinner" style={{
+                    width: '40px',
+                    height: '40px',
+                    margin: '2rem auto',
+                    border: '4px solid #f3f3f3',
+                    borderTop: '4px solid #3498db',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        // Show error state if needed
+        if (error) {
+          return (
+            <section id="products" className="products-section">
+              <div className="products-container">
+                <div className="section-header">
+                  <div className="section-badge">Notice</div>
+                  <h2 className="section-title">Temporary Issue</h2>
+                  <p className="section-subtitle">{error}</p>
+                  <button 
+                    onClick={loadProductsFromStorage}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      cursor: 'pointer',
+                      marginTop: '1rem',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <span className="material-icons">refresh</span>
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </section>
+          );
+        }
+
         return (
           <section id="products" className="products-section">
             <div className="products-container">
@@ -1556,7 +1644,9 @@
                 <div className="section-badge">Our Products</div>
                 <h2 className="section-title">Your Product Collection</h2>
                 <p className="section-subtitle">
-                  Manage and showcase your custom speaker collection
+                  {products.length > 0 
+                    ? 'Manage and showcase your custom speaker collection'
+                    : 'No products found. Add your first product to get started.'}
                 </p>
               </div>
               
@@ -1612,7 +1702,7 @@
                         <h3 className="product-title">{product.name}</h3>
                         <div className="product-price-tag">
                           <span className="currency">₹</span>
-                          {product.price.replace('₹', '')}
+                          {String(product.price || '').replace('₹', '')}
                         </div>
                       </div>
                       <p className="product-desc">{product.description}</p>
