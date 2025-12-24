@@ -1,98 +1,95 @@
-// Client-side product storage using GitHub Gist
-// This bypasses serverless function issues completely
-
+// JSONBin.io storage for products
 class ProductStorage {
   constructor() {
-    this.gistId = 'your-gist-id'; // You'll need to create a gist
-    this.githubToken = 'your-github-token'; // Store this securely
-    this.fallbackToLocalStorage = true;
+    // JSONBin.io configuration
+    this.binId = '694c22ad43b1c97be902fe79'; // Your bin ID
+    this.masterKey = '$2a$10$iltNj5QUuDlY1SqLA3nyOOHHmTSLOM5vOWFa7lXigHekaeqEUCtZK';
+    this.accessKey = '$2a$10$ES9on.WKNP5DHsizP4tt4Oet9OgZTLTZPJfKxN2T.vfhmc2Cm57Qq';
+    this.baseUrl = 'https://api.jsonbin.io/v3/b';
+    this.useLocalStorage = false;
+    this.headers = {
+      'Content-Type': 'application/json',
+      'X-Master-Key': this.masterKey,
+      'X-Access-Key': this.accessKey,
+      'X-Bin-Name': 'Khajotia Sound Products',
+      'X-Bin-Private': 'false'  // Make sure the bin is publicly readable
+    };
   }
 
-  // Load products from GitHub Gist
+  // Helper method to handle API requests
+  async _makeRequest(url, method = 'GET', data = null) {
+    const options = {
+      method,
+      headers: this.headers,
+      body: data ? JSON.stringify(data) : undefined
+    };
+
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }
+
+  // Load all products
   async loadProducts() {
     try {
-      if (!this.gistId || this.gistId === 'your-gist-id') {
-        return this.loadFromLocalStorage();
+      const data = await this._makeRequest(`${this.baseUrl}/${this.binId}/latest`);
+      const binData = data.record || { products: [] };
+      
+      // Ensure we have the products array
+      if (!Array.isArray(binData.products)) {
+        binData.products = [];
       }
-
-      const response = await fetch(`https://api.github.com/gists/${this.gistId}`, {
-        headers: {
-          'Authorization': `token ${this.githubToken}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-
-      if (response.ok) {
-        const gist = await response.json();
-        const content = gist.files['products.json']?.content || '[]';
-        const products = JSON.parse(content);
-        
-        // Update localStorage as backup
-        localStorage.setItem('khajotia-products', JSON.stringify(products));
-        return products;
-      }
+      
+      // Update localStorage as backup
+      localStorage.setItem('khajotia-products', JSON.stringify(binData.products));
+      return binData.products;
+      
     } catch (error) {
-      console.error('Gist load failed, using localStorage:', error);
+      console.error('JSONBin load failed, falling back to localStorage:', error);
+      this.useLocalStorage = true;
+      return this.loadFromLocalStorage();
     }
-
-    return this.loadFromLocalStorage();
   }
 
-  // Save products to GitHub Gist
+  // Save all products
   async saveProducts(products) {
-    try {
-      // Always save to localStorage first
-      localStorage.setItem('khajotia-products', JSON.stringify(products));
-
-      if (!this.gistId || this.gistId === 'your-gist-id' || !this.githubToken) {
-        return products; // Only localStorage available
-      }
-
-      const response = await fetch(`https://api.github.com/gists/${this.gistId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `token ${this.githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          files: {
-            'products.json': {
-              content: JSON.stringify(products, null, 2)
-            }
-          }
-        })
-      });
-
-      if (response.ok) {
-        return products;
-      }
-    } catch (error) {
-      console.error('Gist save failed, using localStorage only:', error);
+    if (!Array.isArray(products)) {
+      throw new Error('Products must be an array');
     }
 
-    return products;
-  }
-
-  // Load from localStorage fallback
-  loadFromLocalStorage() {
     try {
-      const stored = localStorage.getItem('khajotia-products');
-      return stored ? JSON.parse(stored) : [];
+      await this._makeRequest(
+        `${this.baseUrl}/${this.binId}`, 
+        'PUT', 
+        { products: products }  // Wrap products in an object
+      );
+      
+      // Also update localStorage as backup
+      localStorage.setItem('khajotia-products', JSON.stringify(products));
+      return products;
+      
     } catch (error) {
-      console.error('LocalStorage load failed:', error);
-      return [];
+      console.error('JSONBin save failed, falling back to localStorage:', error);
+      this.useLocalStorage = true;
+      return this.saveToLocalStorage(products);
     }
   }
 
   // Add a new product
   async addProduct(productData) {
     const products = await this.loadProducts();
-    
     const newProduct = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
       ...productData,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     products.push(newProduct);
@@ -106,17 +103,18 @@ class ProductStorage {
     const products = await this.loadProducts();
     const index = products.findIndex(p => p.id === productId);
     
-    if (index !== -1) {
-      products[index] = {
-        ...products[index],
-        ...updateData,
-        updatedAt: new Date().toISOString(),
-      };
-      await this.saveProducts(products);
-      return products[index];
+    if (index === -1) {
+      throw new Error('Product not found');
     }
-    
-    throw new Error('Product not found');
+
+    products[index] = {
+      ...products[index],
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveProducts(products);
+    return products[index];
   }
 
   // Delete a product
@@ -124,19 +122,40 @@ class ProductStorage {
     const products = await this.loadProducts();
     const filteredProducts = products.filter(p => p.id !== productId);
     
-    if (products.length !== filteredProducts.length) {
-      await this.saveProducts(filteredProducts);
-      return true;
+    if (products.length === filteredProducts.length) {
+      throw new Error('Product not found');
     }
-    
-    throw new Error('Product not found');
+
+    await this.saveProducts(filteredProducts);
+    return true;
+  }
+
+  // Fallback to localStorage methods
+  async loadFromLocalStorage() {
+    try {
+      const stored = localStorage.getItem('khajotia-products');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('LocalStorage load failed:', error);
+      return [];
+    }
+  }
+
+  async saveToLocalStorage(products) {
+    try {
+      localStorage.setItem('khajotia-products', JSON.stringify(products));
+      return products;
+    } catch (error) {
+      console.error('LocalStorage save failed:', error);
+      throw error;
+    }
   }
 }
 
-// Global storage instance
+// Initialize and export
 const productStorage = new ProductStorage();
 
-// Export for use in HTML files
+// Make available globally
 if (typeof window !== 'undefined') {
   window.productStorage = productStorage;
 }
